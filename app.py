@@ -7,29 +7,19 @@ import requests
 from flask import Flask, render_template
 
 # ── Innstillinger ───────────────────────────────────────────────
-TEACHER_URL = "http://192.168.1.1:5000/data"   # ← IP-adressen du får av læreren. Husk port 5000 og /data til slutt, og http:// foran!
-NAME = "Ola Nordmann"                          # ← ditt eget navn
-SEND_INTERVAL = 30                             # Antall sekunder mellom hver sending. Denne kan godt stå på 30.
+TEACHER_URL = "http://10.2.0.58:5000/data"     # ← IP-adressen til lærer-Pi-en
+NAME = "Zakaria"                          # ← Ditt eget navn
+SEND_INTERVAL = 30                             # Antall sekunder mellom hver sending
 # ──────────────────────────────────────────────────────────────────────────────
 
 app = Flask(__name__)
 
-def get_local_ip(): # ny kode for å hente ut riktig IP fra Pien.
-    try:
-        # Komplisert forklaring: Oppretter kobling mot en ekstern adresse. Ingen data sendes – vi bruker det bare for å se hvilken IP-adresse OSet velger, og finner dermed vår lokale IP.
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except Exception:
-        return "unknown"
 
 def get_status():
     """Henter systeminfo fra denne Pi-en og pakker det i en dict."""
     # Prøv å finne IP-adressen. Hvis det feiler, bruk teksten "unknown".
     try:
-        ip = get_local_ip()
+        ip = socket.gethostbyname(socket.gethostname())
     except Exception:
         ip = "unknown"
 
@@ -47,6 +37,7 @@ def get_status():
         "disk":     psutil.disk_usage("/").percent,   # Diskbruk i prosent
         "uptime":   f"{hours}h {minutes}m",
     }
+
 
 @app.route("/")
 def index():
